@@ -175,18 +175,30 @@
     </aside>
 
     <main class="main-content">
-        <!-- PANEL CUENTA EN LA NUBE (SUPABASE) -->
+               <!-- PANEL CUENTA EN LA NUBE (BLOQUEADO POR CÓDIGO PRO) -->
         <div class="card card-cloud oculto" id="panelCloud">
             <div class="card-title">
-                <span>☁️ Sincronización en la Nube (Tu PC y tu Móvil conectados)</span>
+                <span>☁️ Sincronización en la Nube (PC ↔ Móvil)</span>
                 <button class="btn-del" onclick="toggleCloud()">✕ Cerrar</button>
             </div>
-            <div id="cloudLoginForm">
+
+            <div id="cloudLockBox">
                 <p style="font-size:12px; color:#1e3a8a; margin-bottom:10px;">
-                    Crea tu cuenta gratuita o inicia sesión con el mismo correo en tu ordenador y en tu teléfono. Tus datos locales actuales se subirán automáticamente.
+                    Actualmente estás usando <strong>MiCajaPro en modo local privado</strong> (todos tus datos se guardan únicamente en este dispositivo).<br><br>
+                    🔒 La <strong>Sincronización en la Nube entre PC y Móvil</strong> está reservada para usuarios con <strong>Código de Acceso Pro / Beta</strong>. Si quieres solicitar tu código de invitación, escríbenos por WhatsApp o correo.
+                </p>
+                <div class="form-row">
+                    <input type="text" id="codigoProInput" placeholder="Introduce tu código de invitación...">
+                    <button class="btn-guardar" style="background:#2563eb;" onclick="desbloquearNube()">Activar Nube</button>
+                </div>
+            </div>
+
+            <div id="cloudLoginForm" class="oculto">
+                <p style="font-size:12px; color:#1e3a8a; margin-bottom:10px;">
+                    ✅ <strong>Acceso Nube activado.</strong> Inicia sesión o crea tu cuenta para sincronizar tu PC y tu teléfono móvil.
                 </p>
                 <div class="form-row" style="margin-bottom:8px;">
-                    <input type="email" id="cloudEmail" placeholder="Tu correo electrónico (ej: golahconil@gmail.com)">
+                    <input type="email" id="cloudEmail" placeholder="Tu correo electrónico">
                     <input type="password" id="cloudPass" placeholder="Contraseña (mínimo 6 caracteres)">
                 </div>
                 <div class="form-row">
@@ -194,6 +206,7 @@
                     <button class="btn-guardar" style="background:#059669;" onclick="registrarNube()">Crear cuenta nueva</button>
                 </div>
             </div>
+
             <div id="cloudLoggedPanel" class="oculto" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <span style="font-size:13px; font-weight:700; color:#1e3a8a;" id="cloudUserEmail">Conectado</span>
                 <div style="display:flex; gap:8px;">
@@ -202,6 +215,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- PANEL AJUSTES EMPRESA -->
         <div class="card card-config oculto" id="panelConfig">
@@ -312,6 +326,25 @@
                 <div id="desgloseCategorias"></div>
             </div>
         </div>
+                <footer style="text-align:center; font-size:11px; color:#64748b; padding:12px 0 24px;">
+            MiCajaPro · Herramienta de control interno y precontabilidad (no sustituye a un software de facturación certificada).<br>
+            <a href="#" onclick="document.getElementById('modalLegal').classList.remove('oculto'); return false;" style="color:#2563eb; font-weight:700; text-decoration:none;">Política de Privacidad, Protección de Datos (RGPD / LOPDGDD) y Aviso Legal</a>
+        </footer>
+
+        <div id="modalLegal" class="oculto" style="position:fixed; inset:0; background:rgba(15,23,42,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px;">
+            <div style="background:white; max-width:560px; width:100%; max-height:85vh; overflow-y:auto; border-radius:18px; padding:22px; box-shadow:0 20px 40px rgba(0,0,0,0.3); font-size:12px; line-height:1.55; color:#334155;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:12px;">
+                    <strong style="font-size:15px; color:#0f172a;">⚖️ Política de Privacidad (RGPD) y Aviso Legal</strong>
+                    <button onclick="document.getElementById('modalLegal').classList.add('oculto')" style="background:#f1f5f9; border:none; padding:6px 10px; border-radius:8px; font-weight:800; cursor:pointer;">✕ Cerrar</button>
+                </div>
+                <p style="margin-bottom:8px;"><strong>1. Responsable del tratamiento:</strong> Juan Pérez Camacho (Conil de la Frontera, Cádiz). Contacto para soporte o ejercicio de derechos: <strong>golahconil@gmail.com</strong>.</p>
+                <p style="margin-bottom:8px;"><strong>2. Uso local vs. Sincronización en la nube:</strong> En modo local, todos los datos se guardan exclusivamente en la memoria del navegador del propio usuario sin transmisión a servidores externos. Únicamente para usuarios autorizados mediante código de invitación que activen la sincronización en la nube, el correo electrónico y los apuntes internos se almacenan cifrados para prestar dicho servicio.</p>
+                <p style="margin-bottom:8px;"><strong>3. Alojamiento y seguridad (Encargados del tratamiento):</strong> La web se aloja en <strong>Netlify</strong> y la sincronización autorizada en <strong>Supabase</strong> (servidores ubicados en la Unión Europea, Fráncfort) con aislamiento estricto por usuario. Las métricas anónimas de uso se recogen mediante <strong>GoatCounter</strong> sin cookies ni rastreo personal.</p>
+                <p style="margin-bottom:8px;"><strong>4. Conservación y derechos (RGPD / LOPDGDD):</strong> Puedes exportar o borrar tus datos locales en cualquier momento desde la propia aplicación o solicitar la supresión definitiva de tu cuenta sincronizada enviando un correo a <strong>golahconil@gmail.com</strong>.</p>
+                <p style="margin-bottom:0;"><strong>5. Naturaleza de la herramienta:</strong> MiCajaPro es una aplicación gratuita de apoyo para el control interno de caja y precontabilidad. No constituye asesoramiento fiscal ni sustituye a un sistema informático de facturación certificada.</p>
+            </div>
+        </div>
+
     </main>
 </div>
 <script>
@@ -342,6 +375,31 @@
         b.classList.toggle('trim-activo', (i + 1) === trimestreActual);
     });
     document.getElementById('tituloListado').innerText = `Movimientos del ${trimestreActual}T`;
+    const CODIGO_PRO_VALIDO = 'CONILPRO26';
+
+    function comprobarAccesoPro() {
+        const desbloqueado = localStorage.getItem('mcp_pro_activo') === '1' || usuarioNube;
+        const lockBox = document.getElementById('cloudLockBox');
+        const loginForm = document.getElementById('cloudLoginForm');
+        if (desbloqueado) {
+            if (lockBox) lockBox.classList.add('oculto');
+            if (!usuarioNube && loginForm) loginForm.classList.remove('oculto');
+        } else {
+            if (lockBox) lockBox.classList.remove('oculto');
+            if (loginForm) loginForm.classList.add('oculto');
+        }
+    }
+
+    function desbloquearNube() {
+        const cod = document.getElementById('codigoProInput').value.trim().toUpperCase();
+        if (cod === CODIGO_PRO_VALIDO) {
+            localStorage.setItem('mcp_pro_activo', '1');
+            comprobarAccesoPro();
+            alert('🎉 ¡Código válido! Ya puedes iniciar sesión o crear tu cuenta en la nube.');
+        } else {
+            alert('❌ Código no válido. Solicita tu código de invitación al administrador.');
+        }
+    }
 
     function actualizarEstadoVisualNube(conectado, email = '') {
         const pill = document.getElementById('estadoNubeTexto');
@@ -737,6 +795,7 @@
         }
     }
 
+comprobarAccesoPro();
 
     aplicarConfigUI();
     renderizar();
