@@ -399,19 +399,31 @@
         actualizarEstadoVisualNube(false);
     }
 
-    async function subirANube() {
-        if (!usuarioNube) return;
-        await sb.from('micajapro_datos').upsert({
+        async function subirANube() {
+        if (!sb) inicializarClienteSupabase();
+        if (!sb || !usuarioNube) return;
+        const { error } = await sb.from('micajapro_datos').upsert({
             user_id: usuarioNube.id,
             config: config,
             movimientos: movimientos,
             updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'user_id' });
+        if (error) {
+            console.error('Error nube:', error);
+            document.getElementById('estadoNubeTexto').innerText = '⚠️ Error nube: ' + error.message;
+        } else {
+            document.getElementById('estadoNubeTexto').innerText = `🟢 Sincronizado: ${usuarioNube.email}`;
+        }
     }
 
     async function cargarDesdeNube(mostrarAviso) {
-        if (!usuarioNube) return;
+        if (!sb) inicializarClienteSupabase();
+        if (!sb || !usuarioNube) return;
         const { data, error } = await sb.from('micajapro_datos').select('*').eq('user_id', usuarioNube.id).maybeSingle();
+        if (error) {
+            if (mostrarAviso) alert('Error al leer nube: ' + error.message);
+            return;
+        }
         if (data) {
             if (data.config) { config = data.config; localStorage.setItem('mcp_config', JSON.stringify(config)); }
             if (data.movimientos) { movimientos = data.movimientos; localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos)); }
@@ -422,6 +434,12 @@
             await subirANube();
         }
     }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && usuarioNube) cargarDesdeNube(false);
+    });
+    setInterval(() => { if (usuarioNube) cargarDesdeNube(false); }, 15000);
+
 
     function toggleCloud() { document.getElementById('panelCloud').classList.toggle('oculto'); }
     function toggleConfig() { document.getElementById('panelConfig').classList.toggle('oculto'); }
