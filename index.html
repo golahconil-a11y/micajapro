@@ -164,7 +164,7 @@
         </div>
 
 <div class="nav-acciones">
-                        <button class="btn-nav oculto" id="btnInstalarApp" style="background:linear-gradient(135deg,#10b981,#059669); color:white; box-shadow:0 4px 12px rgba(16,185,129,0.4);" onclick="instalarAppUnClic()">📲 Instalar App en tu dispositivo</button>
+                        <button class="btn-nav" id="btnInstalarApp" style="background:linear-gradient(135deg,#10b981,#059669); color:white; box-shadow:0 4px 12px rgba(16,185,129,0.4);" onclick="instalarAppUnClic()">📲 Instalar App en tu dispositivo</button>
             <button class="btn-nav btn-cloud" onclick="toggleCloud()">☁️ Cuenta Nube (PC ↔ Móvil)</button>
             <button class="btn-nav btn-excel" onclick="exportarCSV()">📥 Exportar Gestoría (CSV)</button>
             <button class="btn-nav btn-config" onclick="toggleConfig()">⚙️ Ajustes Empresa</button>
@@ -693,21 +693,17 @@
         };
         reader.readAsText(file);
     }
-    let eventoInstalacion = null;
-    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let eventoInstalacion = null;
     const yaInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (yaInstalada) {
+        document.getElementById('btnInstalarApp').classList.add('oculto');
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         eventoInstalacion = e;
-        if (!yaInstalada) {
-            document.getElementById('btnInstalarApp').classList.remove('oculto');
-        }
     });
-
-    if (esIOS && !yaInstalada) {
-        document.getElementById('btnInstalarApp').classList.remove('oculto');
-    }
 
     async function instalarAppUnClic() {
         if (eventoInstalacion) {
@@ -718,10 +714,11 @@
                 registrarEvento('instalada-boton');
             }
             eventoInstalacion = null;
-        } else if (esIOS) {
-            alert('Para instalar MiCajaPro en tu iPhone o iPad:\n\n1. Pulsa el icono de Compartir (el cuadrado con la flecha hacia arriba) en la barra inferior de Safari.\n2. Desliza hacia abajo y toca en "Añadir a pantalla de inicio".');
+        } else {
+            alert('📲 Cómo instalar MiCajaPro en tu teléfono:\n\n• En Samsung Internet: pulsa las 3 rayitas (≡) abajo a la derecha > "Añadir página a" > "Pantalla de inicio".\n• En Chrome: pulsa los 3 puntitos (⋮) arriba a la derecha > "Instalar aplicación".\n• En iPhone (Safari): pulsa Compartir (↑) abajo > "Añadir a pantalla de inicio".');
         }
     }
+
 
     aplicarConfigUI();
     renderizar();
