@@ -622,6 +622,8 @@
         document.getElementById('importeInput').value = '';
         registrarEvento('apunte-guardado');
         renderizar();
+        alert('Guardado OK. Total apuntes: ' + movimientos.length + ' | Fecha: ' + fecha + ' | Trimestre: ' + trimestreActual);
+
         subirANube();
     }
 
