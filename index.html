@@ -268,7 +268,7 @@
                     </div>
                     <input type="text" id="conceptoInput" placeholder="Concepto o Cliente / Proveedor...">
                     <div class="form-row">
-                        <input type="number" id="importeInput" placeholder="Total € (con IVA)" step="0.01">
+                        <input type="text" id="importeInput" placeholder="Total € (con IVA)" step="0.01">
                         <select id="ivaInput">
                             <option value="21">21% IVA</option>
                             <option value="10">10% IVA</option>
@@ -580,17 +580,23 @@
     }
 
     function guardarMovimiento() {
-        const fecha = document.getElementById('fechaInput').value;
-        const numDoc = document.getElementById('numDocInput').value.trim() || 'S/N';
+             let fecha = document.getElementById('fechaInput').value;
+        if (!fecha) {
+            fecha = new Date().toISOString().split('T');
+            document.getElementById('fechaInput').value = fecha;
+        }
+        const numDoc = document.getElementById('numDocInput').value.trim();
         const concepto = document.getElementById('conceptoInput').value.trim();
-        const total = parseFloat(document.getElementById('importeInput').value);
-        const pctIva = parseFloat(document.getElementById('ivaInput').value);
+        const total = parseFloat(String(document.getElementById('importeInput').value).replace(',', '.'));
+        const pctIva = parseFloat(document.getElementById('ivaInput').value) || 0;
         const categoria = document.getElementById('categoriaInput').value;
         const pago = document.getElementById('pagoInput').value;
 
-        if (!fecha || !concepto || isNaN(total) || total <= 0) {
-            return alert('Rellena la fecha, el concepto y un importe válido.');
+        if (!concepto || isNaN(total) || total <= 0) {
+            return alert('Rellena el concepto y un importe válido.');
         }
+
+
 
         const base = total / (1 + (pctIva / 100));
         const cuotaIva = total - base;
