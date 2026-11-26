@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiCajaPro v5 - Gestión en la Nube PC y Móvil</title>
+    <link rel="manifest" href="manifest.json">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+        <script>
+        (function() {
+            var s1 = document.createElement('script');
+            s1.src = 'https://' + 'cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            s1.onload = function() { if (typeof inicializarClienteSupabase === 'function') inicializarClienteSupabase(); };
+            document.head.appendChild(s1);
+
+            var s2 = document.createElement('script');
+            s2.async = true;
+            s2.src = '//' + 'gc.zgo.at/count.js';
+            s2.setAttribute('data-goatcounter', 'https://' + '://goatcounter.com');
+            document.head.appendChild(s2);
+        })();
+    </script>
+
+    <script>
+        function registrarEvento(nombre) {
+            if (window.goatcounter && window.goatcounter.count) {
+                window.goatcounter.count({ path: nombre, title: nombre, event: true });
+            }
+        }
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (!localStorage.getItem('mcp_dispositivo_registrado')) {
+                    localStorage.setItem('mcp_dispositivo_registrado', '1');
+                    registrarEvento('nuevo-dispositivo');
+                }
+                if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                    registrarEvento('uso-app-instalada');
+                }
+            }, 1500);
+        });
+        window.addEventListener('appinstalled', () => { registrarEvento('instalada'); });
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background: #f1f5f9; color: #0f172a; min-height: 100vh; }
+
+        .app-layout { display: flex; flex-direction: column; min-height: 100vh; }
+        .sidebar { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 18px 20px; }
+        .brand { display: flex; justify-content: space-between; align-items: center; }
+        .brand h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .badge { background: #10b981; color: #022c22; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; }
+        .empresa-sub { font-size: 12px; color: #94a3b8; margin-top: 3px; }
+        
+        .nav-acciones { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+        .btn-nav { border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-excel { background: #10b981; color: white; }
+        .btn-backup { background: rgba(255,255,255,0.12); color: white; }
+        .btn-config { background: #334155; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15); }
+        .btn-cloud { background: #2563eb; color: white; }
+        .sync-pill { margin-top: 12px; font-size: 11px; color: #cbd5e1; background: rgba(255,255,255,0.08); padding: 7px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); }
+
+        .trimestres { display: flex; gap: 6px; margin-top: 14px; background: rgba(255,255,255,0.08); padding: 4px; border-radius: 12px; }
+        .trim-btn { flex: 1; background: transparent; border: none; color: #94a3b8; padding: 7px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .trim-activo { background: white; color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+
+        .main-content { flex: 1; padding: 16px; max-width: 1320px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        .resumen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .kpi { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .kpi-label { font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase; }
+        .kpi-val { font-size: 21px; font-weight: 800; margin-top: 4px; }
+        .verde { color: #059669; } .rojo { color: #dc2626; } .azul { color: #2563eb; } .ambar { color: #d97706; }
+
+        .card { background: white; padding: 18px; border-radius: 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        .card-config { border: 2px solid #0f172a; background: #f8fafc; }
+        .card-cloud { border: 2px solid #2563eb; background: #eff6ff; }
+        .card-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #334155; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .oculto { display: none !important; }
+
+        .tipo-switch { display: flex; gap: 8px; margin-bottom: 12px; }
+        .tipo-btn { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 800; font-size: 13px; cursor: pointer; }
+        .activo-ingreso { border-color: #10b981; background: #ecfdf5; color: #047857; }
+        .activo-gasto { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
+
+        .form-grid { display: flex; flex-direction: column; gap: 10px; }
+        .form-row { display: flex; gap: 8px; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 13px; outline: none; background: white; }
+        input:focus, select:focus { border-color: #0f172a; }
+        
+        .acciones-form { display: flex; gap: 8px; }
+        .btn-guardar { flex: 1; background: #0f172a; color: white; border: none; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .btn-voz { background: #2563eb; color: white; border: none; padding: 0 15px; border-radius: 12px; font-size: 18px; cursor: pointer; }
+        .grabando { background: #dc2626 !important; }
+
+        .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .chip { background: white; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .chip button { background: none; border: none; color: #ef4444; font-weight: 800; cursor: pointer; font-size: 12px; }
+        .cat-fila { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; }
+        .cat-fila:last-child { border-bottom: none; }
+
+        .vista-movil-lista .mov-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .vista-movil-lista .mov-item:last-child { border-bottom: none; }
+        .mov-concepto { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .mov-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .mov-doc { background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 6px; font-weight: 700; font-size: 10px; }
+        .mov-importe { font-size: 15px; font-weight: 800; text-align: right; }
+        .mov-iva { font-size: 10px; color: #94a3b8; display: block; }
+        .btn-del { background: none; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+        .btn-del:hover { color: #ef4444; background: #fef2f2; }
+
+        .vista-pc-tabla { display: none; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 10px 12px; background: #f8fafc; color: #475569; font-size: 11px; text-transform: uppercase; font-weight: 800; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 11px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:hover td { background: #f8fafc; }
+        .num-col { text-align: right; font-variant-numeric: tabular-nums; }
+        .tag-tipo { padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; }
+        .tag-ing { background: #dcfce7; color: #166534; }
+        .tag-gas { background: #fee2e2; color: #991b1b; }
+
+        @media (min-width: 900px) {
+            .app-layout { flex-direction: row; }
+            .sidebar { width: 270px; flex-shrink: 0; padding: 26px 20px; display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 0; height: 100vh; }
+            .brand { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .brand h1 { font-size: 24px; }
+            .trimestres { flex-direction: column; background: transparent; padding: 0; gap: 4px; margin-top: 18px; }
+            .trim-btn { text-align: left; padding: 10px 14px; font-size: 13px; }
+            .trim-activo { background: #2563eb; color: white; }
+            .nav-acciones { flex-direction: column; margin-top: 16px; }
+            .btn-nav { width: 100%; justify-content: center; padding: 10px; font-size: 13px; }
+            .main-content { padding: 26px 32px; gap: 20px; }
+            .resumen-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+            .kpi-val { font-size: 24px; }
+            .form-pc-wrap { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+            .tipo-switch { flex-direction: column; margin-bottom: 0; }
+            .form-grid { display: grid; grid-template-columns: 140px 150px 1fr 120px 105px; gap: 10px; }
+            .form-row { display: contents; }
+            .form-grid-fila2 { display: grid; grid-template-columns: 1fr 1fr 210px; gap: 10px; grid-column: 1 / -1; }
+            .workspace-grid { display: grid; grid-template-columns: 1fr 310px; gap: 20px; align-items: start; }
+            .vista-movil-lista { display: none; }
+            .vista-pc-tabla { display: block; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h1 id="tituloApp">MiCajaPro <span class="badge">v5</span></h1>
+                <span class="empresa-sub" id="subtituloEmpresa">Control Contable · Nube Activa</span>
+            </div>
+
+            <div class="sync-pill" onclick="toggleCloud()">
+                <span id="estadoNubeTexto">☁️ Modo local (Pulsa para sincronizar)</span>
+                <span style="font-weight:800; color:#60a5fa;">Conectar</span>
+            </div>
+
+            <div class="trimestres">
+                <button class="trim-btn trim-activo" onclick="cambiarTrimestre(1, this)">1T · Ene–Mar</button>
+                <button class="trim-btn" onclick="cambiarTrimestre(2, this)">2T · Abr–Jun</button>
+                <button class="trim-btn" onclick="cambiarTrimestre(3, this)">3T · Jul–Sep</button>
+                <button class="trim-btn" onclick="cambiarTrimestre(4, this)">4T · Oct–Dic</button>
+            </div>
+        </div>
+
+<div class="nav-acciones">
+                        <button class="btn-nav oculto" id="btnInstalarApp" style="background:linear-gradient(135deg,#10b981,#059669); color:white; box-shadow:0 4px 12px rgba(16,185,129,0.4);" onclick="instalarAppUnClic()">📲 Instalar App en tu dispositivo</button>
+            <button class="btn-nav btn-cloud" onclick="toggleCloud()">☁️ Cuenta Nube (PC ↔ Móvil)</button>
+            <button class="btn-nav btn-excel" onclick="exportarCSV()">📥 Exportar Gestoría (CSV)</button>
+            <button class="btn-nav btn-config" onclick="toggleConfig()">⚙️ Ajustes Empresa</button>
+            <button class="btn-nav btn-backup" onclick="descargarCopia()">💾 Copia Seguridad</button>
+            <button class="btn-nav btn-backup" onclick="document.getElementById('fileImport').click()">📂 Restaurar Copia</button>
+            <input type="file" id="fileImport" accept=".json" style="display:none" onchange="restaurarCopia(event)">
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <!-- PANEL CUENTA EN LA NUBE (SUPABASE) -->
+        <div class="card card-cloud oculto" id="panelCloud">
+            <div class="card-title">
+                <span>☁️ Sincronización en la Nube (Tu PC y tu Móvil conectados)</span>
+                <button class="btn-del" onclick="toggleCloud()">✕ Cerrar</button>
+            </div>
+            <div id="cloudLoginForm">
+                <p style="font-size:12px; color:#1e3a8a; margin-bottom:10px;">
+                    Crea tu cuenta gratuita o inicia sesión con el mismo correo en tu ordenador y en tu teléfono. Tus datos locales actuales se subirán automáticamente.
+                </p>
+                <div class="form-row" style="margin-bottom:8px;">
+                    <input type="email" id="cloudEmail" placeholder="Tu correo electrónico (ej: golahconil@gmail.com)">
+                    <input type="password" id="cloudPass" placeholder="Contraseña (mínimo 6 caracteres)">
+                </div>
+                <div class="form-row">
+                    <button class="btn-guardar" style="background:#2563eb;" onclick="iniciarSesionNube()">Entrar en mi cuenta</button>
+                    <button class="btn-guardar" style="background:#059669;" onclick="registrarNube()">Crear cuenta nueva</button>
+                </div>
+            </div>
+            <div id="cloudLoggedPanel" class="oculto" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <span style="font-size:13px; font-weight:700; color:#1e3a8a;" id="cloudUserEmail">Conectado</span>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-nav btn-cloud" onclick="cargarDesdeNube(true)">🔄 Actualizar ahora</button>
+                    <button class="btn-nav" style="background:#fee2e2; color:#991b1b;" onclick="cerrarSesionNube()">Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL AJUSTES EMPRESA -->
+        <div class="card card-config oculto" id="panelConfig">
+            <div class="card-title">
+                <span>⚙️ Personalización de tu Negocio</span>
+                <button class="btn-del" onclick="toggleConfig()">✕ Cerrar</button>
+            </div>
+            <div class="form-grid">
+                <input type="text" id="cfgNombre" placeholder="Nombre de tu empresa" onchange="guardarConfig()">
+                <div class="form-row">
+                    <select id="cfgRegimen" onchange="guardarConfig()">
+                        <option value="GENERAL">Autónomo / SL (IVA General)</option>
+                        <option value="EXENTO">Exento de IVA (Art. 20 / Formación / Médico)</option>
+                        <option value="RECARGO">Comercio Minorista (Recargo Equivalencia)</option>
+                    </select>
+                    <input type="number" id="cfgIrpf" placeholder="% IRPF" onchange="guardarConfig()">
+                </div>
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:#475569; margin-top:4px;">Tus categorías de gasto:</div>
+                    <div class="chips-wrap" id="listaChipsCat"></div>
+                    <div class="form-row" style="margin-top:8px;">
+                        <input type="text" id="nuevaCatInput" placeholder="Nueva categoría (ej: Amarre, Seguros...)">
+                        <button class="btn-guardar" style="padding:10px 14px;" onclick="agregarCategoria()">+ Añadir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="resumen-grid">
+            <div class="kpi"><div class="kpi-label">Ingresos Base</div><div class="kpi-val verde" id="totalIngresos">0,00 €</div></div>
+            <div class="kpi"><div class="kpi-label">Gastos Base</div><div class="kpi-val rojo" id="totalGastos">0,00 €</div></div>
+            <div class="kpi"><div class="kpi-label" id="labelImpuesto1">IVA a Liquidar (303)</div><div class="kpi-val ambar" id="totalIva">0,00 €</div></div>
+            <div class="kpi"><div class="kpi-label">Beneficio Neto</div><div class="kpi-val azul" id="beneficioNeto">0,00 €</div></div>
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <div class="card">
+            <div class="card-title"><span>Nuevo Apunte Contable</span><span id="infoRegimenTag" style="font-size:11px; color:#64748b;"></span></div>
+            <div class="form-pc-wrap">
+                <div class="tipo-switch">
+                    <button class="tipo-btn activo-ingreso" id="btnTipoIngreso" onclick="setTipo('ingreso')">+ INGRESO</button>
+                    <button class="tipo-btn" id="btnTipoGasto" onclick="setTipo('gasto')">- GASTO</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-row">
+                        <input type="date" id="fechaInput">
+                        <input type="text" id="numDocInput" placeholder="Nº Factura / Ticket">
+                    </div>
+                    <input type="text" id="conceptoInput" placeholder="Concepto o Cliente / Proveedor...">
+                    <div class="form-row">
+                        <input type="number" id="importeInput" placeholder="Total € (con IVA)" step="0.01">
+                        <select id="ivaInput">
+                            <option value="21">21% IVA</option>
+                            <option value="10">10% IVA</option>
+                            <option value="4">4% IVA</option>
+                            <option value="0">0% Exento</option>
+                        </select>
+                    </div>
+                    <div class="form-grid-fila2">
+                        <select id="categoriaInput"></select>
+                        <select id="pagoInput">
+                            <option value="Banco / Transferencia">🏦 Banco / Tarjeta</option>
+                            <option value="Efectivo">💵 Efectivo</option>
+                            <option value="Bizum">📱 Bizum</option>
+                        </select>
+                        <div class="acciones-form">
+                            <button class="btn-guardar" onclick="guardarMovimiento()">Guardar Apunte</button>
+                            <button class="btn-voz" id="btnVoz" onclick="dictarVoz()" title="Dictar por voz">🎤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÁREA DE TRABAJO -->
+        <div class="workspace-grid">
+            <div class="card">
+                <div class="card-title">
+                    <span id="tituloListado">Movimientos del 1T</span>
+                    <input type="text" id="buscadorInput" placeholder="🔍 Filtrar..." style="max-width:190px; padding:6px 10px; font-size:12px;" oninput="renderizar()">
+                </div>
+                <div class="vista-movil-lista" id="listaMovil"></div>
+                <div class="vista-pc-tabla">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Doc.</th>
+                                <th>Tipo</th>
+                                <th>Concepto / Tercero</th>
+                                <th>Categoría</th>
+                                <th>Pago</th>
+                                <th class="num-col">Base €</th>
+                                <th class="num-col">IVA €</th>
+                                <th class="num-col">Total €</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPcBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span>Desglose por Categoría</span></div>
+                <div id="desgloseCategorias"></div>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+        let sb = null;
+    function inicializarClienteSupabase() {
+        if (!sb && window.supabase) {
+            sb = window.supabase.createClient('https://' + 'kamzkvyjooiwuupjdhgk.supabase.co', 'sb_publishable_0SRXVoby0V04ZW8uTiy6xA_0oN1ty56');
+            iniciarNube();
+        }
+    }
+
+    let usuarioNube = null;
+    let tipoActual = 'ingreso';
+    let trimestreActual = Math.floor(new Date().getMonth() / 3) + 1;
+
+    const configDefecto = {
+        nombre: 'Mi Negocio / Autónomo',
+        regimen: 'GENERAL',
+        irpf: 15,
+        categorias: ['Servicios / Ventas', 'Combustible / Transporte', 'Suministros / Luz / Teléfono', 'Material / Mercadería', 'Seguros / Gestoría', 'Otros Gastos']
+    };
+
+    let config = JSON.parse(localStorage.getItem('mcp_config')) || configDefecto;
+    let movimientos = JSON.parse(localStorage.getItem('mcp_movimientos')) || [];
+
+    document.getElementById('fechaInput').valueAsDate = new Date();
+    document.querySelectorAll('.trim-btn').forEach((b, i) => {
+        b.classList.toggle('trim-activo', (i + 1) === trimestreActual);
+    });
+    document.getElementById('tituloListado').innerText = `Movimientos del ${trimestreActual}T`;
+
+    function actualizarEstadoVisualNube(conectado, email = '') {
+        const pill = document.getElementById('estadoNubeTexto');
+        const form = document.getElementById('cloudLoginForm');
+        const logged = document.getElementById('cloudLoggedPanel');
+        if (conectado) {
+            pill.innerText = `🟢 Sincronizado: ${email}`;
+            form.classList.add('oculto');
+            logged.classList.remove('oculto');
+            document.getElementById('cloudUserEmail').innerText = `🟢 Conectado como: ${email}`;
+        } else {
+            pill.innerText = '☁️ Modo local (Pulsa para sincronizar)';
+            form.classList.remove('oculto');
+            logged.classList.add('oculto');
+        }
+    }
+
+    async function iniciarNube() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session && session.user) {
+            usuarioNube = session.user;
+            actualizarEstadoVisualNube(true, usuarioNube.email);
+            await cargarDesdeNube(false);
+        }
+    }
+
+    async function registrarNube() {
+        const email = document.getElementById('cloudEmail').value.trim();
+        const password = document.getElementById('cloudPass').value;
+        if (!email || password.length < 6) return alert('Introduce un correo válido y una contraseña de al menos 6 caracteres.');
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) return alert('Error al crear cuenta: ' + error.message);
+        usuarioNube = data.user;
+        actualizarEstadoVisualNube(true, usuarioNube.email);
+        await subirANube();
+        alert('¡Cuenta creada! Tus datos ya están guardados en la nube.');
+        document.getElementById('panelCloud').classList.add('oculto');
+    }
+
+    async function iniciarSesionNube() {
+        const email = document.getElementById('cloudEmail').value.trim();
+        const password = document.getElementById('cloudPass').value;
+        if (!email || !password) return alert('Introduce tu correo y contraseña.');
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) return alert('Error al entrar: ' + error.message);
+        usuarioNube = data.user;
+        actualizarEstadoVisualNube(true, usuarioNube.email);
+        await cargarDesdeNube(true);
+        document.getElementById('panelCloud').classList.add('oculto');
+    }
+
+    async function cerrarSesionNube() {
+        await sb.auth.signOut();
+        usuarioNube = null;
+        actualizarEstadoVisualNube(false);
+    }
+
+    async function subirANube() {
+        if (!usuarioNube) return;
+        await sb.from('micajapro_datos').upsert({
+            user_id: usuarioNube.id,
+            config: config,
+            movimientos: movimientos,
+            updated_at: new Date().toISOString()
+        });
+    }
+
+    async function cargarDesdeNube(mostrarAviso) {
+        if (!usuarioNube) return;
+        const { data, error } = await sb.from('micajapro_datos').select('*').eq('user_id', usuarioNube.id).maybeSingle();
+        if (data) {
+            if (data.config) { config = data.config; localStorage.setItem('mcp_config', JSON.stringify(config)); }
+            if (data.movimientos) { movimientos = data.movimientos; localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos)); }
+            aplicarConfigUI();
+            renderizar();
+            if (mostrarAviso) alert('✅ Datos sincronizados desde la nube.');
+        } else {
+            await subirANube();
+        }
+    }
+
+    function toggleCloud() { document.getElementById('panelCloud').classList.toggle('oculto'); }
+    function toggleConfig() { document.getElementById('panelConfig').classList.toggle('oculto'); }
+
+    function aplicarConfigUI() {
+        document.getElementById('subtituloEmpresa').innerText = config.nombre;
+        document.getElementById('cfgNombre').value = config.nombre;
+        document.getElementById('cfgRegimen').value = config.regimen;
+        document.getElementById('cfgIrpf').value = config.irpf;
+
+        const mapaRegimen = {
+            GENERAL: 'Régimen General · IVA Deducible',
+            EXENTO: 'Exento de IVA · Sin repercusión',
+            RECARGO: 'Comercio · Recargo Equivalencia'
+        };
+        document.getElementById('infoRegimenTag').innerText = mapaRegimen[config.regimen] || '';
+        document.getElementById('labelImpuesto1').innerText = config.regimen === 'GENERAL' ? 'IVA a Liquidar (303)' : 'IVA Soportado';
+
+        const sel = document.getElementById('categoriaInput');
+        sel.innerHTML = '';
+        config.categorias.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.innerText = c;
+            sel.appendChild(opt);
+        });
+
+        const chips = document.getElementById('listaChipsCat');
+        chips.innerHTML = '';
+        config.categorias.forEach((c, idx) => {
+            chips.innerHTML += `<span class="chip">${c} <button onclick="borrarCategoria(${idx})">×</button></span>`;
+        });
+    }
+
+    function guardarConfig() {
+        config.nombre = document.getElementById('cfgNombre').value.trim() || 'Mi Negocio';
+        config.regimen = document.getElementById('cfgRegimen').value;
+        config.irpf = parseFloat(document.getElementById('cfgIrpf').value) || 0;
+        localStorage.setItem('mcp_config', JSON.stringify(config));
+        aplicarConfigUI();
+        renderizar();
+        subirANube();
+    }
+
+    function agregarCategoria() {
+        const val = document.getElementById('nuevaCatInput').value.trim();
+        if (!val) return;
+        config.categorias.push(val);
+        document.getElementById('nuevaCatInput').value = '';
+        guardarConfig();
+    }
+
+    function borrarCategoria(idx) {
+        if (config.categorias.length <= 1) return alert('Debes mantener al menos una categoría.');
+        config.categorias.splice(idx, 1);
+        guardarConfig();
+    }
+
+    function setTipo(tipo) {
+        tipoActual = tipo;
+        document.getElementById('btnTipoIngreso').className = tipo === 'ingreso' ? 'tipo-btn activo-ingreso' : 'tipo-btn';
+        document.getElementById('btnTipoGasto').className = tipo === 'gasto' ? 'tipo-btn activo-gasto' : 'tipo-btn';
+    }
+
+    function cambiarTrimestre(trim, btn) {
+        trimestreActual = trim;
+        document.querySelectorAll('.trim-btn').forEach(b => b.classList.remove('trim-activo'));
+        btn.classList.add('trim-activo');
+        document.getElementById('tituloListado').innerText = `Movimientos del ${trim}T`;
+        renderizar();
+    }
+
+    function guardarMovimiento() {
+        const fecha = document.getElementById('fechaInput').value;
+        const numDoc = document.getElementById('numDocInput').value.trim() || 'S/N';
+        const concepto = document.getElementById('conceptoInput').value.trim();
+        const total = parseFloat(document.getElementById('importeInput').value);
+        const pctIva = parseFloat(document.getElementById('ivaInput').value);
+        const categoria = document.getElementById('categoriaInput').value;
+        const pago = document.getElementById('pagoInput').value;
+
+        if (!fecha || !concepto || isNaN(total) || total <= 0) {
+            return alert('Rellena la fecha, el concepto y un importe válido.');
+        }
+
+        const base = total / (1 + (pctIva / 100));
+        const cuotaIva = total - base;
+
+        movimientos.unshift({
+            id: Date.now(),
+            fecha,
+            numDoc,
+            tipo: tipoActual,
+            concepto,
+            categoria,
+            pago,
+            total,
+            base,
+            cuotaIva,
+            pctIva
+        });
+
+        localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos));
+        document.getElementById('conceptoInput').value = '';
+        document.getElementById('numDocInput').value = '';
+        document.getElementById('importeInput').value = '';
+        registrarEvento('apunte-guardado');
+        renderizar();
+        subirANube();
+    }
+
+    function borrarMovimiento(id) {
+        if (!confirm('¿Eliminar este registro contable?')) return;
+        movimientos = movimientos.filter(m => m.id !== id);
+        localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos));
+        renderizar();
+        subirANube();
+    }
+
+    function formatoEuro(num) {
+        return num.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    function renderizar() {
+        const filtro = document.getElementById('buscadorInput').value.toLowerCase();
+        const listaMovil = document.getElementById('listaMovil');
+        const tablaPc = document.getElementById('tablaPcBody');
+        const desgloseDiv = document.getElementById('desgloseCategorias');
+
+        listaMovil.innerHTML = '';
+        tablaPc.innerHTML = '';
+
+        let ingBase = 0, gasBase = 0, ivaRep = 0, ivaSop = 0;
+        let porCat = {};
+
+        const filtrados = movimientos.filter(m => {
+            const mes = parseInt(m.fecha.split('-')[1], 10);
+            const trim = Math.floor((mes - 1) / 3) + 1;
+            const coincideTrim = trim === trimestreActual;
+            const coincideTexto = !filtro || m.concepto.toLowerCase().includes(filtro) || m.categoria.toLowerCase().includes(filtro) || (m.numDoc && m.numDoc.toLowerCase().includes(filtro));
+            return coincideTrim && coincideTexto;
+        });
+
+        filtrados.forEach(m => {
+            if (m.tipo === 'ingreso') {
+                ingBase += m.base;
+                ivaRep += m.cuotaIva;
+            } else {
+                gasBase += m.base;
+                ivaSop += m.cuotaIva;
+                porCat[m.categoria] = (porCat[m.categoria] || 0) + m.base;
+            }
+
+            const signo = m.tipo === 'ingreso' ? '+' : '-';
+            const claseColor = m.tipo === 'ingreso' ? 'verde' : 'rojo';
+
+            listaMovil.innerHTML += `
+                <div class="mov-item">
+                    <div>
+                        <div class="mov-concepto">${m.concepto}</div>
+                        <div class="mov-meta"><span class="mov-doc">${m.numDoc || 'S/N'}</span> · ${m.fecha} · ${m.categoria}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <div class="mov-importe ${claseColor}">
+                            ${signo}${formatoEuro(m.total)}
+                            <span class="mov-iva">Base: ${formatoEuro(m.base)}</span>
+                        </div>
+                        <button class="btn-del" onclick="borrarMovimiento(${m.id})">✕</button>
+                    </div>
+                </div>
+            `;
+
+            tablaPc.innerHTML += `
+                <tr>
+                    <td>${m.fecha}</td>
+                    <td><span class="mov-doc">${m.numDoc || 'S/N'}</span></td>
+                    <td><span class="tag-tipo ${m.tipo === 'ingreso' ? 'tag-ing' : 'tag-gas'}">${m.tipo.toUpperCase()}</span></td>
+                    <td><strong>${m.concepto}</strong></td>
+                    <td>${m.categoria}</td>
+                    <td>${m.pago || 'Banco'}</td>
+                    <td class="num-col">${formatoEuro(m.base)}</td>
+                    <td class="num-col">${formatoEuro(m.cuotaIva)} (${m.pctIva}%)</td>
+                    <td class="num-col ${claseColor}" style="font-weight:800;">${signo}${formatoEuro(m.total)}</td>
+                    <td><button class="btn-del" onclick="borrarMovimiento(${m.id})">🗑️</button></td>
+                </tr>
+            `;
+        });
+
+        if (filtrados.length === 0) {
+            listaMovil.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; padding:18px 0;">Sin movimientos en este trimestre.</div>';
+            tablaPc.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding:24px;">No hay apuntes registrados en este trimestre.</td></tr>';
+        }
+
+        const ivaLiquidar = config.regimen === 'GENERAL' ? (ivaRep - ivaSop) : ivaSop;
+        document.getElementById('totalIngresos').innerText = formatoEuro(ingBase);
+        document.getElementById('totalGastos').innerText = formatoEuro(gasBase);
+        document.getElementById('totalIva').innerText = formatoEuro(ivaLiquidar);
+        document.getElementById('beneficioNeto').innerText = formatoEuro(ingBase - gasBase);
+
+        const entries = Object.entries(porCat).sort((a, b) => b[1] - a[1]);
+        desgloseDiv.innerHTML = entries.length ? '' : '<div style="color:#94a3b8; font-size:12px;">Sin gastos desglosados.</div>';
+        entries.forEach(([cat, val]) => {
+            desgloseDiv.innerHTML += `<div class="cat-fila"><span>${cat}</span><strong>${formatoEuro(val)}</strong></div>`;
+        });
+    }
+
+    function dictarVoz() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert('Tu navegador no soporta dictado por voz. Usa Chrome.');
+        const rec = new SpeechRecognition();
+        rec.lang = 'es-ES';
+        const btn = document.getElementById('btnVoz');
+        btn.classList.add('grabando');
+        rec.onresult = (e) => {
+            const texto = e.results[0][0].transcript;
+            const matchNum = texto.match(/(\d+(?:[.,]\d+)?)/);
+            if (matchNum) {
+                document.getElementById('importeInput').value = matchNum[0].replace(',', '.');
+                document.getElementById('conceptoInput').value = texto.replace(matchNum[0], '').replace(/euros?/gi, '').trim();
+            } else {
+                document.getElementById('conceptoInput').value = texto;
+            }
+        };
+        rec.onend = () => btn.classList.remove('grabando');
+        rec.start();
+    }
+
+    function exportarCSV() {
+        if (!movimientos.length) return alert('No hay datos para exportar.');
+        let csv = 'Fecha;Documento;Tipo;Concepto;Categoria;Pago;Base Imponible;Cuota IVA;% IVA;Total\n';
+        movimientos.forEach(m => {
+            csv += `${m.fecha};"${m.numDoc || 'S/N'}";${m.tipo.toUpperCase()};"${m.concepto}";"${m.categoria}";"${m.pago || 'Banco'}";${m.base.toFixed(2).replace('.', ',')};${m.cuotaIva.toFixed(2).replace('.', ',')};${m.pctIva}%;${m.total.toFixed(2).replace('.', ',')}\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Contabilidad_${config.nombre.replace(/\s+/g, '_')}_${trimestreActual}T.csv`;
+        link.click();
+        registrarEvento('exportar-excel');
+    }
+
+    function descargarCopia() {
+        const paquete = { config, movimientos };
+        const blob = new Blob([JSON.stringify(paquete, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Backup_MiCajaPro_${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+    }
+
+    function restaurarCopia(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.config) config = data.config;
+                if (data.movimientos) movimientos = data.movimientos;
+                localStorage.setItem('mcp_config', JSON.stringify(config));
+                localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos));
+                aplicarConfigUI();
+                renderizar();
+                subirANube();
+                alert('Copia de seguridad restaurada.');
+            } catch (err) {
+                alert('Archivo no válido.');
+            }
+        };
+        reader.readAsText(file);
+    }
+    let eventoInstalacion = null;
+    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const yaInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        eventoInstalacion = e;
+        if (!yaInstalada) {
+            document.getElementById('btnInstalarApp').classList.remove('oculto');
+        }
+    });
+
+    if (esIOS && !yaInstalada) {
+        document.getElementById('btnInstalarApp').classList.remove('oculto');
+    }
+
+    async function instalarAppUnClic() {
+        if (eventoInstalacion) {
+            eventoInstalacion.prompt();
+            const { outcome } = await eventoInstalacion.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('btnInstalarApp').classList.add('oculto');
+                registrarEvento('instalada-boton');
+            }
+            eventoInstalacion = null;
+        } else if (esIOS) {
+            alert('Para instalar MiCajaPro en tu iPhone o iPad:\n\n1. Pulsa el icono de Compartir (el cuadrado con la flecha hacia arriba) en la barra inferior de Safari.\n2. Desliza hacia abajo y toca en "Añadir a pantalla de inicio".');
+        }
+    }
+
+    aplicarConfigUI();
+    renderizar();
+    iniciarNube();
+</script>
+</body>
+</html>
