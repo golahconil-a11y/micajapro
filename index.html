@@ -582,7 +582,8 @@
     function guardarMovimiento() {
              let fecha = document.getElementById('fechaInput').value;
         if (!fecha) {
-            fecha = new Date().toISOString().split('T');
+       fecha = new Date().toISOString().split('T')[0];
+
             document.getElementById('fechaInput').value = fecha;
         }
         const numDoc = document.getElementById('numDocInput').value.trim();
@@ -649,7 +650,10 @@
         let porCat = {};
 
         const filtrados = movimientos.filter(m => {
-            const mes = parseInt(m.fecha.split('-')[1], 10);
+                     const fStr = Array.isArray(m.fecha) ? m.fecha[0] : String(m.fecha || '');
+            const partes = fStr.includes('-') ? fStr.split('-') : fStr.split('/');
+            const mes = parseInt(partes[1]);
+
             const trim = Math.floor((mes - 1) / 3) + 1;
             const coincideTrim = trim === trimestreActual;
             const coincideTexto = !filtro || m.concepto.toLowerCase().includes(filtro) || m.categoria.toLowerCase().includes(filtro) || (m.numDoc && m.numDoc.toLowerCase().includes(filtro));
