@@ -620,11 +620,10 @@
         document.getElementById('conceptoInput').value = '';
         document.getElementById('numDocInput').value = '';
         document.getElementById('importeInput').value = '';
-        registrarEvento('apunte-guardado');
-        renderizar();
-        alert('Guardado OK. Total apuntes: ' + movimientos.length + ' | Fecha: ' + fecha + ' | Trimestre: ' + trimestreActual);
-
+              renderizar();
         subirANube();
+        try { registrarEvento('apunte-guardado'); } catch(e) {}
+
     }
 
     function borrarMovimiento(id) {
