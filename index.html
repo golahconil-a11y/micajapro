@@ -457,24 +457,32 @@
         actualizarEstadoVisualNube(false);
     }
 
-        async function subirANube() {
+    let estaSubiendo = false;
+
+    async function subirANube() {
         if (!sb) inicializarClienteSupabase();
         if (!sb || !usuarioNube) return;
-        const { error } = await sb.from('micajapro_datos').upsert({
-            user_id: usuarioNube.id,
-            config: config,
-            movimientos: movimientos,
-            updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-        if (error) {
-            console.error('Error nube:', error);
-            document.getElementById('estadoNubeTexto').innerText = '⚠️ Error nube: ' + error.message;
-        } else {
-            document.getElementById('estadoNubeTexto').innerText = `🟢 Sincronizado: ${usuarioNube.email}`;
+        estaSubiendo = true;
+        try {
+            const { error } = await sb.from('micajapro_datos').upsert({
+                user_id: usuarioNube.id,
+                config: config,
+                movimientos: movimientos,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+            if (error) {
+                console.error('Error nube:', error);
+                document.getElementById('estadoNubeTexto').innerText = '⚠️ Error nube: ' + error.message;
+            } else {
+                document.getElementById('estadoNubeTexto').innerText = `🟢 Sincronizado: ${usuarioNube.email}`;
+            }
+        } finally {
+            estaSubiendo = false;
         }
     }
 
     async function cargarDesdeNube(mostrarAviso) {
+        if (estaSubiendo) return;
         if (!sb) inicializarClienteSupabase();
         if (!sb || !usuarioNube) return;
         const { data, error } = await sb.from('micajapro_datos').select('*').eq('user_id', usuarioNube.id).maybeSingle();
@@ -482,16 +490,17 @@
             if (mostrarAviso) alert('Error al leer nube: ' + error.message);
             return;
         }
-        if (data) {
+        if (data && !estaSubiendo) {
             if (data.config) { config = data.config; localStorage.setItem('mcp_config', JSON.stringify(config)); }
             if (data.movimientos) { movimientos = data.movimientos; localStorage.setItem('mcp_movimientos', JSON.stringify(movimientos)); }
             aplicarConfigUI();
             renderizar();
             if (mostrarAviso) alert('✅ Datos sincronizados desde la nube.');
-        } else {
+        } else if (!data) {
             await subirANube();
         }
     }
+
 
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden && usuarioNube) cargarDesdeNube(false);
