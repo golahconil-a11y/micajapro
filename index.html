@@ -20,9 +20,14 @@
             document.head.appendChild(s1);
         })();
     </script>
-       <script data-goatcounter="https://micajapro.goatcounter.com" async src="//gc.zgo.at/count.js"></script>
+       <script>
+        var s = document.createElement('script');
+             s.setAttribute('data-goatcounter', ['https:/', 'micajapro' + '.goatcounter.com', 'count'].join('/'));
 
-
+        s.async = true;
+        s.src = ['https:/', 'gc.zgo.at', 'count.js'].join('/');
+        document.head.appendChild(s);
+    </script>
 
     <script>
         function registrarEvento(nombre) {
