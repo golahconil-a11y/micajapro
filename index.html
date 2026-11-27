@@ -10,7 +10,7 @@
             navigator.serviceWorker.register('sw.js');
         }
     </script>
-           <script>
+            <script>
         (function() {
             var s1 = document.createElement('script');
             s1.src = 'https://' + 'cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -18,13 +18,14 @@
                 if (typeof inicializarClienteSupabase === 'function') inicializarClienteSupabase();
             };
             document.head.appendChild(s1);
-
-            var s2 = document.createElement('script');
-            s2.setAttribute('data-goatcounter', 'https://' + 'micajapro.' + 'goatcounter.' + 'com/count');
-            s2.async = true;
-            s2.src = 'https://' + 'gc.zgo.at/count.js';
-            document.head.appendChild(s2);
         })();
+    </script>
+          <script>
+        var gc = document.createElement('script');
+        gc.setAttribute('data-goatcounter', 'https://' + 'micajapro.' + 'goatcounter.' + 'com/count');
+        gc.async = true;
+        gc.src = 'https://' + 'gc.zgo.' + 'at/count.js';
+        document.head.appendChild(gc);
     </script>
 
 
