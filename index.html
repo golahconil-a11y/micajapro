@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MiCajaPro v5 - Gestión en la Nube PC y Móvil</title>
     <link rel="manifest" href="manifest.json">
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+       <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
         <script>
         (function() {
             var s1 = document.createElement('script');
             s1.src = 'https://' + 'cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            s1.onload = function() { if (typeof inicializarClienteSupabase === 'function') inicializarClienteSupabase(); };
             document.head.appendChild(s1);
 
             var s2 = document.createElement('script');
+                  s2.setAttribute('data-goatcounter', 'https://' + 'micajapro.' + 'goatcounter.' + 'com/count');
+
             s2.async = true;
-            s2.src = '//' + 'gc.zgo.at/count.js';
-            s2.setAttribute('data-goatcounter', 'https://' + '://goatcounter.com');
+            s2.src = 'https://' + 'gc.zgo.at/count.js';
             document.head.appendChild(s2);
         })();
     </script>
